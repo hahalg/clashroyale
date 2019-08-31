@@ -3,62 +3,127 @@
 import os
 import win32api
 import win32gui
+#import win32ui
+#from ctypes import windll
 import win32con
 
+def get_confs():
+    cwd = os.getcwd()+'\\cheat\\clashroyale'
+    # print(cwd)
+    res = []
+    res['img_battle'] = f'{cwd}\\img\\battle.png'
+    res['img_open'] = f'{cwd}\\img\\time_open.png'
+    
+    return res
+
+
 class CONFS:
+    # cwd = os.getcwd()+'\\cheat\\clashroyale'
     cwd = os.getcwd()
     if 'clashroyale' not in cwd:
         cwd = cwd+'\\clashroyale'
 
     img_battle = f'{cwd}\\img\\battle.png'
     img_open = f'{cwd}\\img\\time_open.png'
+    img_blank = f'{cwd}\\img\\blank.png'
     img_startunlock = f'{cwd}\\img\\start_unlock.png'
+    img_onclick = f'{cwd}\\img\\onclick.png'
+    img_close = f'{cwd}\\img\\close.png'
+    img_ok = f'{cwd}\\img\\ok.png'
+    
+    img_3h = f'{cwd}\\img\\time_3h.png'
+    img_4h = f'{cwd}\\img\\time_4h.png'
+    img_6h = f'{cwd}\\img\\time_6h.png'
+    img_8h = f'{cwd}\\img\\time_8h.png'
+    img_12h = f'{cwd}\\img\\time_12h.png'
+    img_90m = f'{cwd}\\img\\time_90m.png'
+    img_opennow = f'{cwd}\\img\\open_now.png'
 
     img_h = f'{cwd}\\img\\time_h.png'
     img_min = f'{cwd}\\img\\time_min.png'
     img_sec = f'{cwd}\\img\\time_sec.png'
     
     box_types = ['90m','3h','4h','6h','8h','12h','blank','opennow']
-    for mtype in box_types:
-        # exec(f'self.img_{mtype} = f\'{self.cwd}\\img\\\\time_{mtype}.png\'')
-        exec(f'img_{mtype} = f\'{cwd}\\img\\\\time_{mtype}.png\'')
-
+    # for mtype in box_types:
+    #     exec(f'img_{mtype} = \'{cwd}\img\\time_{mtype}.png\'')
+    
     # print(img_3h)
-
-    game_area_width = 417   #412
-    game_area_height = 741  #730
-    game_box_top = 532      #530
-    game_box_bottom = 662   #656
-    game_box_width = 95     #94
-    game_box_height = 118   #116
+    '''
+    game_area_width = 412
+    game_area_height = 730
+    game_box_top = 530
+    game_box_bottom = 656
+    game_box_width = 94
+    game_box_height = 116
     game_box_space = 10
 
+    game_area_width = 412   #403
+    game_area_height = 733  #716
+    game_box_top = 524      #514
+    game_box_bottom = 658   #645
+    game_box_width = 93     #92
+    game_box_height = 120   #114
+    game_box_space = 10      #10
+    '''
+    game_area_width = 403
+    game_area_height = 716
+    game_box_top = 514
+    game_box_bottom = 645
+    game_box_width = 92
+    game_box_height = 114
+    game_box_space = 10      #10
+
+    app_left = 899
+    app_top = 5
+    app_width = 416
+    app_height = 751
+
     def __init__(self,window_title):
-
-
+        
         self.screen_width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
         self.screen_height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
+        # print('system:',params)
         self.hwnd = win32gui.FindWindow(win32con.NULL,window_title)
         if self.hwnd == 0 :
             print('%s not found' % window_title)
             exit(-1)
+        # win32gui.SetForegroundWindow(self.hwnd)
         window_left,window_top,window_right,window_bottom = win32gui.GetWindowRect(self.hwnd)
-        if min(window_left,window_top) < 0: #判断是否超出屏幕，可不用
+        print('game状态：',end=' ')
+        print(window_left,window_top,window_right,window_bottom)
+        window_width = window_right-window_left
+        window_height = window_bottom-window_top
+        print('width:',window_width,'height:',window_height)
+        if window_width!= self.app_width:
+            print('resize APP window!')
+            self.resizeAPP()
+        # if min(window_left,window_top) < 0:
             # or window_right > self.screen_width']\
             # or window_bottom > self.screen_height']:
             # errExit('window is at wrong position')
-            print('err!')
-            exit(-1)
+            # CLASHROYALE.errExit(des=params)
+            # print('params err!')
+            # exit(-1)
         self.window_width = window_right - window_left
         self.window_height = window_bottom - window_top
 
-        self.game_area_left = window_left + 9   #左侧边缘
-        self.game_area_top = window_top + 32    #顶部边缘
+        # self.game_area_left = window_left + 53
+        self.game_area_left = window_left + 8
+        self.game_area_top = window_top + 34
+        # self.game_area_top = window_top + 42
         self.game_area_right = self.game_area_left + self.game_area_width
         self.game_area_bottom = self.game_area_top + self.game_area_height
 
+    def resizeAPP(self):
+        win32gui.SetWindowPos(
+            self.hwnd,win32con.HWND_BOTTOM, 
+            self.app_left, self.app_top, self.app_width, self.app_height,
+            win32con.SWP_SHOWWINDOW
+        )
+
+
 if __name__ == '__main__':
-    windowTitle = 'Android Emulator - sq_Pixel_2_API_28:5554'
-    game = CONFS(windowTitle)
-    print(game.img_3h)
-    print(game)
+  
+    print('start:'+"-"*20)
+    # game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_28:5554')
+    game = CONFS('Android Emulator - sq_Pixel_2_API_24:5554')

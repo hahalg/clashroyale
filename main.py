@@ -13,9 +13,9 @@ import time,random
 import config
 import curses
 from ocr import ocr
-# sys.path.append("..\\..")
-# from sqlib.sq_waitakey_lib import WAITAKEY
-from sq_waitakey_lib import WAITAKEY
+sys.path.append("..")
+from sqlib.sq_waitakey_lib import WAITAKEY
+# from sq_waitakey_lib import WAITAKEY
 from sq_grab_lib import grabAPP
 
 class CLASHROYALE(WAITAKEY):
@@ -44,20 +44,70 @@ class CLASHROYALE(WAITAKEY):
         '''得到战斗界面'''
         game_area_image = self.grabScreen(self.game_params.game_area_left,self.game_params.game_area_top,self.game_params.game_area_right,self.game_params.game_area_bottom)
         # game_area_image.show()  #如程序在第二屏则截图是全黑
+        self.imgbg = cv2.cvtColor(np.asarray(game_area_image),cv2.COLOR_RGB2BGR)
+        self.clickWindow()  #是否有可点的主界面消息
 
         img_battle = cv2.imread(self.game_params.img_battle)
-        self.imgbg = cv2.cvtColor(np.asarray(game_area_image),cv2.COLOR_RGB2BGR)
 
-        is_battle,_ = self.inHere(img_battle,self.imgbg)
+        is_battle,pos_battle = self.inHere(img_battle,self.imgbg)
 
         if not is_battle:
             spos = pyautogui.position()
+            # x,y = pos_battle[0]
+            # cx = self.game_params.game_area_left + x
+            # cy = self.game_params.game_area_top + self.game_params.game_box_bottom + y
+                       
             m_mv_x = self.game_params.game_area_left+self.game_params.game_area_width/2
             m_mv_y = self.game_params.game_area_top+700
-            # pyautogui.moveTo(m_mv_x,m_mv_y,duration=0.5)
+            
+            # pyautogui.moveTo(m_mv_x,m_mv_y,duration=2)
             pyautogui.click(m_mv_x,m_mv_y)
             pyautogui.moveTo(spos)
             time.sleep(0.3)
+
+    def clickWindow(self):
+        '''点击无用的系统必须的点击事件'''
+        #close事件
+        # img_bot = self.grabScreen(
+        #     self.game_params.game_area_left,
+        #     self.game_params.game_area_top+self.game_params.game_box_bottom,self.game_params.game_area_right,
+        #     self.game_params.game_area_top+self.game_params.game_area_height)
+        # img_bot.show()
+        # img_bot = cv2.cvtColor(np.asarray(img_bot),cv2.COLOR_RGB2BGR)
+        img_close = cv2.imread(self.game_params.img_close)
+        is_click,spos = self.inHere(img_close,self.imgbg,0.5)
+        if is_click:
+            x,y = spos[0]
+            cx = self.game_params.game_area_left + x
+            cy = self.game_params.game_area_top + y
+            pyautogui.click(cx,cy)
+        #OK事件
+        img_ok = cv2.imread(self.game_params.img_ok)
+        is_click,spos = self.inHere(img_ok,self.imgbg,0.5)
+        if is_click:
+            x,y = spos[0]
+            cx = self.game_params.game_area_left + x
+            cy = self.game_params.game_area_top + y
+            pyautogui.click(cx,cy)
+
+        #主窗口事件
+        img_bot = self.grabScreen(
+            self.game_params.game_area_left,
+            self.game_params.game_area_top+self.game_params.game_box_bottom,self.game_params.game_area_right,
+            self.game_params.game_area_top+self.game_params.game_area_height)
+        # img_bot.show()
+        img_bot = cv2.cvtColor(np.asarray(img_bot),cv2.COLOR_RGB2BGR)
+        img_click = cv2.imread(self.game_params.img_onclick)
+        is_click,spos = self.inHere(img_click,img_bot,0.5)
+        if is_click:
+            x,y = spos[0]
+            cx = self.game_params.game_area_left + x
+            cy = self.game_params.game_area_top + self.game_params.game_box_bottom + y
+            pyautogui.click(cx,cy)
+        else:
+            print('no message.')
+            # exit(0)
+
 
 
 
@@ -103,6 +153,7 @@ class CLASHROYALE(WAITAKEY):
         if len(box_status)<4 :
             crontable['sleep'] = 20
             crontable['err'] = 'box err!'
+            crontable['notice'] = str(self.game_params.game_area_width)+' X '+str(self.game_params.game_area_height)+' OK?'
             print('box err!',box_status)
             return crontable
         do_now = False
@@ -188,7 +239,7 @@ class CLASHROYALE(WAITAKEY):
         if is_open:
             print('Box is ready!go!',open_point)
             x,y = open_point[0]
-            
+           
             cx = self.game_params.game_area_left+x
             cy = self.game_params.game_area_top+self.game_params.game_box_top+y
             # print(cx,cy)
@@ -238,21 +289,23 @@ class CLASHROYALE(WAITAKEY):
         # print('click!')
         time.sleep(0.5)
         self.imgbg = self.grabScreen(self.game_params.game_area_left,self.game_params.game_area_top,self.game_params.game_area_right,self.game_params.game_area_bottom)
+        # self.imgbg.show()
         self.imgbg = cv2.cvtColor(np.asarray(self.imgbg),cv2.COLOR_RGB2BGR)
         img_startunlock = cv2.imread(self.game_params.img_startunlock)
         # cv2.imshow('',img_startunlock)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()        
-        is_start,start_point = self.inHere(img_startunlock,self.imgbg)
+        is_start,start_point = self.inHere(img_startunlock,self.imgbg,0.6)
         if is_start:
+            print(f'start unlock box {n}.')
             x,y = start_point[0]
             cx = self.game_params.game_area_left+x
             cy = self.game_params.game_area_top+y
-            # print(cx,cy)
-            pyautogui.moveTo(cx,cy,duration=0.0)
+            print(cx,cy)
+            pyautogui.moveTo(cx,cy,duration=0.5)
             pyautogui.click(cx,cy)
         else:
-            print('unlock failed!')
+            print(f'unlock {n} box failed!')
             res = False
         return res
 
@@ -302,8 +355,8 @@ class CLASHROYALE(WAITAKEY):
 if __name__ == '__main__':
   
     print('start:'+"-"*20)
-    game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_28:5554')
-    # game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_24:5554')
+    # game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_28:5554')
+    game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_24:5554')
     spos = pyautogui.position()
     game.battleWindow()
     cron_table = game.analy()
