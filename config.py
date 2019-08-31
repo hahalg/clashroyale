@@ -19,15 +19,6 @@ class CONFS:
     img_onclick = f'{cwd}\\img\\onclick.png'
     img_close = f'{cwd}\\img\\close.png'
     img_ok = f'{cwd}\\img\\ok.png'
-    '''
-    img_3h = f'{cwd}\\img\\time_3h.png'
-    img_4h = f'{cwd}\\img\\time_4h.png'
-    img_6h = f'{cwd}\\img\\time_6h.png'
-    img_8h = f'{cwd}\\img\\time_8h.png'
-    img_12h = f'{cwd}\\img\\time_12h.png'
-    img_90m = f'{cwd}\\img\\time_90m.png'
-    img_opennow = f'{cwd}\\img\\open_now.png'
-    '''
 
     img_h = f'{cwd}\\img\\time_h.png'
     img_min = f'{cwd}\\img\\time_min.png'
@@ -37,24 +28,6 @@ class CONFS:
     for mtype in box_types:
         exec(f'img_{mtype} = \'{cwd}\img\\\\time_{mtype}.png\'')
     
-    # print(img_3h)
-    '''
-    game_area_width = 412
-    game_area_height = 730
-    game_box_top = 530
-    game_box_bottom = 656
-    game_box_width = 94
-    game_box_height = 116
-    game_box_space = 10
-
-    game_area_width = 412   #403
-    game_area_height = 733  #716
-    game_box_top = 524      #514
-    game_box_bottom = 658   #645
-    game_box_width = 93     #92
-    game_box_height = 120   #114
-    game_box_space = 10      #10
-    '''
     game_area_width = 403
     game_area_height = 716
     game_box_top = 514
@@ -91,10 +64,8 @@ class CONFS:
             # print('params err!')
             # exit(-1)
 
-        # self.game_area_left = window_left + 53
         self.game_area_left = self.window_left + 8
         self.game_area_top = self.window_top + 34
-        # self.game_area_top = window_top + 42
         self.game_area_right = self.game_area_left + self.game_area_width
         self.game_area_bottom = self.game_area_top + self.game_area_height
 
@@ -108,11 +79,9 @@ class CONFS:
         window_left,window_top,window_right,window_bottom = win32gui.GetWindowRect(self.hwnd)
         print('game状态：',end=' ')
         print(window_left,window_top,window_right,window_bottom)
-        window_width = window_right-window_left
-        window_height = window_bottom-window_top
-        print('width:',window_width,'height:',window_height)
         self.window_width = window_right - window_left
         self.window_height = window_bottom - window_top
+        print('width:',self.window_width,'height:',self.window_height)
         self.window_top = window_top
         self.window_left = window_left
 

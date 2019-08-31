@@ -78,17 +78,17 @@ class CLASHROYALE(WAITAKEY):
         is_click,spos = self.inHere(img_close,self.imgbg,0.5)
         if is_click:
             x,y = spos[0]
-            cx = self.game_params.game_area_left + x
-            cy = self.game_params.game_area_top + y
-            pyautogui.click(cx,cy)
+            cx = self.game_params.game_area_left + x + img_close.shape[1]/2
+            cy = self.game_params.game_area_top + y + img_close.shape[0]/2
+            pyautogui.click(cx,cy,interval=0.5)
         #OK事件
         img_ok = cv2.imread(self.game_params.img_ok)
         is_click,spos = self.inHere(img_ok,self.imgbg,0.5)
         if is_click:
             x,y = spos[0]
-            cx = self.game_params.game_area_left + x
-            cy = self.game_params.game_area_top + y
-            pyautogui.click(cx,cy)
+            cx = self.game_params.game_area_left + x + img_ok.shape[1]/2
+            cy = self.game_params.game_area_top + y + img_ok.shape[0]/2
+            pyautogui.click(cx,cy,interval=0.5)
 
         #主窗口事件
         img_bot = self.grabScreen(
@@ -103,7 +103,7 @@ class CLASHROYALE(WAITAKEY):
             x,y = spos[0]
             cx = self.game_params.game_area_left + x
             cy = self.game_params.game_area_top + self.game_params.game_box_bottom + y
-            pyautogui.click(cx,cy)
+            pyautogui.click(cx,cy,interval=0.5)
         else:
             print('no message.')
             # exit(0)
