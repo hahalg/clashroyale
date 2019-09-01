@@ -52,7 +52,7 @@ class CLASHROYALE(WAITAKEY):
         is_battle,pos_battle = self.inHere(img_battle,self.imgbg)
 
         if not is_battle:
-            spos = pyautogui.position()
+            oldpos = pyautogui.position()
             # x,y = pos_battle[0]
             # cx = self.game_params.game_area_left + x
             # cy = self.game_params.game_area_top + self.game_params.game_box_bottom + y
@@ -62,11 +62,12 @@ class CLASHROYALE(WAITAKEY):
             
             # pyautogui.moveTo(m_mv_x,m_mv_y,duration=2)
             pyautogui.click(m_mv_x,m_mv_y)
-            pyautogui.moveTo(spos)
-            time.sleep(0.3)
+            pyautogui.moveTo(oldpos)
+            time.sleep(0.5)
 
     def clickWindow(self):
         '''点击无用的系统必须的点击事件'''
+        oldpos = pyautogui.position()
         #close事件
         # img_bot = self.grabScreen(
         #     self.game_params.game_area_left,
@@ -107,6 +108,7 @@ class CLASHROYALE(WAITAKEY):
         else:
             print('no message.')
             # exit(0)
+        pyautogui.moveTo(oldpos)
 
 
 
