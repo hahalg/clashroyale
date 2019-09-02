@@ -13,8 +13,8 @@ import time,random
 import config
 import curses
 from ocr import ocr
-sys.path.append("..")
-from sqlib.sq_waitakey_lib import WAITAKEY
+# sys.path.append("..")
+from sq_waitakey_lib import WAITAKEY
 # from sq_waitakey_lib import WAITAKEY
 from sq_grab_lib import grabAPP
 
