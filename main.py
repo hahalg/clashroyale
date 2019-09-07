@@ -42,13 +42,9 @@ class CLASHROYALE(WAITAKEY):
 
     def battleWindow(self):
         '''得到战斗界面'''
-        game_area_image = self.grabScreen(self.game_params.game_area_left,self.game_params.game_area_top,self.game_params.game_area_right,self.game_params.game_area_bottom)
-        # game_area_image.show()  #如程序在第二屏则截图是全黑
-        self.imgbg = cv2.cvtColor(np.asarray(game_area_image),cv2.COLOR_RGB2BGR)
         self.clickWindow()  #是否有可点的主界面消息
 
         img_battle = cv2.imread(self.game_params.img_battle)
-
         is_battle,pos_battle = self.inHere(img_battle,self.imgbg)
 
         if not is_battle:
@@ -63,11 +59,18 @@ class CLASHROYALE(WAITAKEY):
             # pyautogui.moveTo(m_mv_x,m_mv_y,duration=2)
             pyautogui.click(m_mv_x,m_mv_y)
             pyautogui.moveTo(oldpos)
-            time.sleep(0.5)
+            time.sleep(1)
+
+    def updateImgbg(self):
+        game_area_image = self.grabScreen(self.game_params.game_area_left,          self.game_params.game_area_top,self.game_params.game_area_right,        self.game_params.game_area_bottom)
+        # game_area_image.show()  #如程序在第二屏则截图是全黑
+        self.imgbg = cv2.cvtColor(np.asarray(game_area_image),cv2.COLOR_RGB2BGR)
 
     def clickWindow(self):
         '''点击无用的系统必须的点击事件'''
         oldpos = pyautogui.position()
+        self.updateImgbg()
+        isSleep = False
         #close事件
         # img_bot = self.grabScreen(
         #     self.game_params.game_area_left,
@@ -81,7 +84,8 @@ class CLASHROYALE(WAITAKEY):
             x,y = spos[0]
             cx = self.game_params.game_area_left + x + img_close.shape[1]/2
             cy = self.game_params.game_area_top + y + img_close.shape[0]/2
-            pyautogui.click(cx,cy,interval=0.5)
+            pyautogui.click(cx,cy)
+            isSleep = True
         #OK事件
         img_ok = cv2.imread(self.game_params.img_ok)
         is_click,spos = self.inHere(img_ok,self.imgbg,0.5)
@@ -89,7 +93,8 @@ class CLASHROYALE(WAITAKEY):
             x,y = spos[0]
             cx = self.game_params.game_area_left + x + img_ok.shape[1]/2
             cy = self.game_params.game_area_top + y + img_ok.shape[0]/2
-            pyautogui.click(cx,cy,interval=0.5)
+            pyautogui.click(cx,cy)
+            isSleep = True
 
         #主窗口事件
         img_bot = self.grabScreen(
@@ -104,10 +109,14 @@ class CLASHROYALE(WAITAKEY):
             x,y = spos[0]
             cx = self.game_params.game_area_left + x
             cy = self.game_params.game_area_top + self.game_params.game_box_bottom + y
-            pyautogui.click(cx,cy,interval=0.5)
+            pyautogui.click(cx,cy)
+            isSleep = True
         else:
             print('no message.')
             # exit(0)
+        if isSleep :
+            time.sleep(3)
+            self.updateImgbg()
         pyautogui.moveTo(oldpos)
 
 
