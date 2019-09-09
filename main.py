@@ -8,23 +8,24 @@ import os,cv2,sys
 from PIL import ImageGrab,Image
 import pyautogui
 import win32gui,win32api
+import win32con
 import numpy as np
 import time,random
 import config
 import curses
 from ocr import ocr
-# sys.path.append("..")
 from sq_waitakey_lib import WAITAKEY
-# from sq_waitakey_lib import WAITAKEY
-from sq_grab_lib import grabAPP
-
+# from sq_grab_lib import grabAPP
+from subprocess import call
 class CLASHROYALE(WAITAKEY):
+    auto = False    #是否自动执行
     def __init__(self,windowTitle):
         # super(CLASHROYALE,self).__init__()
         self.stdscr = curses.initscr()
         self.initCurses()
         self.windowTitle = windowTitle
         self.getWindow()
+        self.autoRun()
 
     def getWindow(self):
         '''得到窗口相关信息'''
@@ -32,8 +33,50 @@ class CLASHROYALE(WAITAKEY):
         self.putTop()
 
     def putTop(self):
-        win32api.keybd_event(0,0,0,0)
-        win32gui.SetForegroundWindow(self.game_params.hwnd)
+        if self.auto:
+            try:
+                win32api.keybd_event(0,0,0,0)
+                win32gui.SetForegroundWindow(self.game_params.hwnd)
+            except:
+                #start emulator
+                self.game_params.startApp(self.windowTitle)
+                time.sleep(5)
+                self.runApp()
+    
+        else:
+            win32api.keybd_event(0,0,0,0)
+            win32gui.SetForegroundWindow(self.game_params.hwnd)
+
+    def runApp(self):
+        #run clash royale
+        if self.clickBT('applogo'):
+            time.sleep(20)
+            #loginBT      #bwx      #wrx
+            img_bts = ['loginBT','bwx','wrx']
+            for imgbt in img_bts:
+                if self.clickBT(imgbt):
+                    time.sleep(15)
+        else:
+            print('run app err!')
+
+    def clickBT(self,imgname=None,grabscreen=True,threshold=0.8):
+        if imgname is None:
+            return False
+        if grabscreen:
+            self.updateImgbg()
+        img_bt = cv2.imread(self.game_params.img[imgname])
+        is_,pos_ = self.inHere(img_bt,self.imgbg,threshold)
+        if is_:
+            x,y = pos_[0]
+            cx = self.game_params.game_area_left + x + img_bt.shape[1]/2
+            cy = self.game_params.game_area_top + y + img_bt.shape[0]/2
+            pyautogui.moveTo(cx,cy,duration=0.5)
+            pyautogui.click(cx,cy)
+            return True
+        else:
+            # print('not find img '+imgname,self.game_params.img[imgname])
+            return False
+
 
     @staticmethod
     def errExit(des='err!',ecode=-1):
@@ -44,7 +87,7 @@ class CLASHROYALE(WAITAKEY):
         '''得到战斗界面'''
         self.clickWindow()  #是否有可点的主界面消息
 
-        img_battle = cv2.imread(self.game_params.img_battle)
+        img_battle = cv2.imread(self.game_params.img['battle'])
         is_battle,pos_battle = self.inHere(img_battle,self.imgbg)
 
         if not is_battle:
@@ -72,29 +115,13 @@ class CLASHROYALE(WAITAKEY):
         self.updateImgbg()
         isSleep = False
         #close事件
-        # img_bot = self.grabScreen(
-        #     self.game_params.game_area_left,
-        #     self.game_params.game_area_top+self.game_params.game_box_bottom,self.game_params.game_area_right,
-        #     self.game_params.game_area_top+self.game_params.game_area_height)
-        # img_bot.show()
-        # img_bot = cv2.cvtColor(np.asarray(img_bot),cv2.COLOR_RGB2BGR)
-        img_close = cv2.imread(self.game_params.img_close)
-        is_click,spos = self.inHere(img_close,self.imgbg,0.5)
-        if is_click:
-            x,y = spos[0]
-            cx = self.game_params.game_area_left + x + img_close.shape[1]/2
-            cy = self.game_params.game_area_top + y + img_close.shape[0]/2
-            pyautogui.click(cx,cy)
+        if self.clickBT('close',False):
             isSleep = True
+            time.sleep(3)
         #OK事件
-        img_ok = cv2.imread(self.game_params.img_ok)
-        is_click,spos = self.inHere(img_ok,self.imgbg,0.5)
-        if is_click:
-            x,y = spos[0]
-            cx = self.game_params.game_area_left + x + img_ok.shape[1]/2
-            cy = self.game_params.game_area_top + y + img_ok.shape[0]/2
-            pyautogui.click(cx,cy)
+        if self.clickBT('ok',False):
             isSleep = True
+            time.sleep(3)
 
         #主窗口事件
         img_bot = self.grabScreen(
@@ -103,7 +130,7 @@ class CLASHROYALE(WAITAKEY):
             self.game_params.game_area_top+self.game_params.game_area_height)
         # img_bot.show()
         img_bot = cv2.cvtColor(np.asarray(img_bot),cv2.COLOR_RGB2BGR)
-        img_click = cv2.imread(self.game_params.img_onclick)
+        img_click = cv2.imread(self.game_params.img['onclick'])
         is_click,spos = self.inHere(img_click,img_bot,0.5)
         if is_click:
             x,y = spos[0]
@@ -111,11 +138,12 @@ class CLASHROYALE(WAITAKEY):
             cy = self.game_params.game_area_top + self.game_params.game_box_bottom + y
             pyautogui.click(cx,cy)
             isSleep = True
+            time.sleep(3)
         else:
             print('no message.')
             # exit(0)
         if isSleep :
-            time.sleep(3)
+            # time.sleep(3)
             self.updateImgbg()
         pyautogui.moveTo(oldpos)
 
@@ -185,7 +213,7 @@ class CLASHROYALE(WAITAKEY):
         # 是否有进行中的情况，有的话计算剩余时间
         if do_now:
             print('\topen now! time:')
-            img_sec = cv2.imread(self.game_params.img_sec)
+            img_sec = cv2.imread(self.game_params.img['sec'])
             is_have,point_type = self.inHere(img_sec,self.imgbg)
             if not is_have:
                 # crontable.append({'sleep':3600})
@@ -239,7 +267,7 @@ class CLASHROYALE(WAITAKEY):
         '''返回4个箱子的情况'''
 
         box_status = {}
-        img_open = cv2.imread(self.game_params.img_open)
+        img_open = cv2.imread(self.game_params.img['open'])
         # cv2.imshow('',img)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
@@ -269,11 +297,12 @@ class CLASHROYALE(WAITAKEY):
         img_type = None
         is_have = None
         point_type = None
-        img_file = []
+        # img_file = []
         for mtype in self.game_params.box_types:
             # print(f'self.game_params.img_{mtype}')
-            exec(f'img_file.append(self.game_params.img_{mtype})')
-            img_type = cv2.imread(img_file.pop())
+            # exec(f'img_file.append(self.game_params.img_{mtype})')
+            img_type = cv2.imread(self.game_params.img[mtype])
+            # img_type = cv2.imread(img_file.pop())
             if mtype=='opennow':
                 is_have,point_type = self.inHere(img_type,self.imgbg,0.5)
             else:
@@ -288,21 +317,18 @@ class CLASHROYALE(WAITAKEY):
     
     def startUnlock(self,n=1):
         '''解锁第n个宝箱'''
-        res = True
+        # res = True
         if n<1 or n>4 :
             return False
         cx = self.game_params.game_area_left+(self.game_params.game_box_space+self.game_params.game_box_width)*(n-1)+self.game_params.game_box_width/2
         cy = self.game_params.game_area_top+self.game_params.game_box_top+self.game_params.game_box_height/2
-        # print(cx,cy)
-        # pyautogui.moveTo(cx,cy,1)
-        # pyautogui.moveTo(1070,615,1)
         pyautogui.click(cx,cy)
-        # print('click!')
         time.sleep(0.5)
+        '''
         self.imgbg = self.grabScreen(self.game_params.game_area_left,self.game_params.game_area_top,self.game_params.game_area_right,self.game_params.game_area_bottom)
         # self.imgbg.show()
         self.imgbg = cv2.cvtColor(np.asarray(self.imgbg),cv2.COLOR_RGB2BGR)
-        img_startunlock = cv2.imread(self.game_params.img_startunlock)
+        img_startunlock = cv2.imread(self.game_params.img['start_unlock'])
         # cv2.imshow('',img_startunlock)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()        
@@ -318,7 +344,11 @@ class CLASHROYALE(WAITAKEY):
         else:
             print(f'unlock {n} box failed!')
             res = False
-        return res
+        '''
+        if not self.clickBT('start_unlock',True,0.6):
+            print(f'unlock {n} box failed!')
+            return False
+        return True
 
     
     def getSeat(self,pos):
@@ -360,8 +390,15 @@ class CLASHROYALE(WAITAKEY):
         # print('here!!!!!')
         if self.go:
             self.flashBoxStatus()
-            self.waitTime()
+            if self.waitSec < 1:
+                self.e.set()
+                return
+            else:
+                self.waitTime()
 
+    def autoRun(self):
+        self.auto = not self.auto
+        self.showTime(1,4,'auto model:'+str(self.auto).ljust(5))
 
 if __name__ == '__main__':
   
@@ -375,10 +412,9 @@ if __name__ == '__main__':
     if cron_table["sleep"] > 0 :
         print(f'wait {cron_table["sleep"]}s ')
         # m_mstr = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
-        m_mstr = 'press \'q\' to quit,\'r\' to reload box. Reflash after '
+        m_mstr = 'press \'q\' to quit,\'r\' to reload box. \'a\' to auto. Reflash after '
         acts = {
-            'a':'self.showTime(3,10,\'like do it\')',
-            'b':'self.showTime(4,10,\'yes!!!!\',2)',
+            'a':'self.autoRun()',
             'r':'self.flashBoxStatus()',
                 }
         game.setStr(m_mstr)

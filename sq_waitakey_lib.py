@@ -46,6 +46,7 @@ class WAITAKEY(object):
         if akey == 'q':
             print(' quit')
             self.go = False
+            self.waitSec = 0
             self.e.set()
             return
 
