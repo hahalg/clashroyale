@@ -40,6 +40,11 @@ class CONFS:
     for mtype in img_types:
         img[mtype] = f'{cwd}\\img\\{mtype}.png'
 
+    game_items = ['bd','hunter','mk','bb','mh','zap','guards','cc']
+    img['card'] = {}
+    for item in game_items:
+        img['card'][item] = f'{cwd}\\img\\b_{item}.png'
+
 
     game_area_width = 403
     game_area_height = 716
@@ -54,9 +59,9 @@ class CONFS:
     app_width = 416
     app_height = 751
 
-    app_cmd = {'exe':'C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe',
-    'params':'-avd sq_Pixel_2_API_24 -netfast',
-    'dir':'C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\emulator\\'}
+    app_cmd = {'exe':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe',
+    'params':'-avd sq_Pixel_2_API_28 -netfast',
+    'dir':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\'}
 
     def __init__(self,window_title):
         
@@ -117,6 +122,7 @@ if __name__ == '__main__':
   
     print('start:'+"-"*20)
     # game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_28:5554')
-    game = CONFS('Android Emulator - sq_Pixel_2_API_24:5554')
+    # game = CONFS('Android Emulator - sq_Pixel_2_API_24:5554')
+    game = CONFS('Android Emulator - sq_Pixel_2_API_28:5554')
     a = 'app_cmd'
     print(game)

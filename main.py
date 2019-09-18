@@ -20,9 +20,9 @@ from subprocess import call
 class CLASHROYALE(WAITAKEY):
     auto = False    #是否自动执行
     def __init__(self,windowTitle):
-        # super(CLASHROYALE,self).__init__()
-        self.stdscr = curses.initscr()
-        self.initCurses()
+        super(CLASHROYALE,self).__init__()
+        # self.stdscr = curses.initscr()
+        # self.initCurses()
         self.windowTitle = windowTitle
         self.getWindow()
         self.autoRun()
@@ -172,6 +172,7 @@ class CLASHROYALE(WAITAKEY):
         for pt in zip(*loc[::-1]):
             result = True
             mpt.append(pt)
+            # break
             # print('pt:',pt)
             # 画出方框
             # cv2.rectangle(img2, pt, (pt[0] + w, pt[1] + h), (7,249,151), 2)
@@ -192,7 +193,8 @@ class CLASHROYALE(WAITAKEY):
         if len(box_status)<4 :
             crontable['sleep'] = 20
             crontable['err'] = 'box err!'
-            crontable['notice'] = str(self.game_params.game_area_width)+' X '+str(self.game_params.game_area_height)+' OK?'
+            # crontable['notice'] = str(self.game_params.game_area_width)+' X '+str(self.game_params.game_area_height)+' OK?'
+            crontable['notice'] = str(box_status)
             print('box err!',box_status)
             return crontable
         do_now = False
@@ -263,7 +265,7 @@ class CLASHROYALE(WAITAKEY):
         return crontable
 
     
-    def getBoxStatus(self,img):
+    def getBoxStatus(self,imgbg):
         '''返回4个箱子的情况'''
 
         box_status = {}
@@ -271,10 +273,10 @@ class CLASHROYALE(WAITAKEY):
         # cv2.imshow('',img)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
-        self.imgbg = img
+        # self.imgbg = img
 
         # 到时间的箱子
-        is_open,open_point = self.inHere(img_open,self.imgbg)
+        is_open,open_point = self.inHere(img_open,imgbg)
         if is_open:
             print('Box is ready!go!',open_point)
             x,y = open_point[0]
@@ -299,14 +301,14 @@ class CLASHROYALE(WAITAKEY):
         point_type = None
         # img_file = []
         for mtype in self.game_params.box_types:
-            # print(f'self.game_params.img_{mtype}')
+            # print(self.game_params.img[mtype])
             # exec(f'img_file.append(self.game_params.img_{mtype})')
             img_type = cv2.imread(self.game_params.img[mtype])
             # img_type = cv2.imread(img_file.pop())
             if mtype=='opennow':
-                is_have,point_type = self.inHere(img_type,self.imgbg,0.5)
+                is_have,point_type = self.inHere(img_type,imgbg,0.5)
             else:
-                is_have,point_type = self.inHere(img_type,self.imgbg)
+                is_have,point_type = self.inHere(img_type,imgbg)
             if is_have:
                 getBoxSeat(point_type,mtype)
         # box_status_r = sorted(box_status.items(),key=lambda x:x[0])
@@ -404,7 +406,8 @@ if __name__ == '__main__':
   
     print('start:'+"-"*20)
     # game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_28:5554')
-    game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_24:5554')
+    game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_28:5554')
+    
     spos = pyautogui.position()
     game.battleWindow()
     cron_table = game.analy()
@@ -423,6 +426,5 @@ if __name__ == '__main__':
         game.startWait()            
 
         # print('\nloop','='*20)
-
 
 
