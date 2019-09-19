@@ -92,7 +92,13 @@ class CLASHROYALE(WAITAKEY):
 
         if not is_battle:
             oldpos = pyautogui.position()
-            self.clickBT('battle1',False)
+            if not self.clickBT('battle1',False):
+                print('not in game?',end=' ')
+                if self.clickBT('applogo',False):
+                    print('start game...')
+                    time.sleep(5)
+                else:
+                    print('Not find game!')
             pyautogui.moveTo(oldpos)
             time.sleep(2)
 
@@ -106,7 +112,7 @@ class CLASHROYALE(WAITAKEY):
         oldpos = pyautogui.position()
         self.updateImgbg()
         isSleep = False
-        clicks = ['close','ok','wrx']        #要加入try again事件
+        clicks = ['close','ok','wrx','bwx','wbx']        #要加入try again事件
         for c in clicks:
             if self.clickBT(c,False):
                 isSleep = True
@@ -129,7 +135,8 @@ class CLASHROYALE(WAITAKEY):
             isSleep = True
             time.sleep(3)
         else:
-            print('no message.')
+            # print('no message.')
+            pass
             # exit(0)
         if isSleep :
             # time.sleep(3)
