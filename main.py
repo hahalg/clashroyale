@@ -112,7 +112,7 @@ class CLASHROYALE(WAITAKEY):
         oldpos = pyautogui.position()
         self.updateImgbg()
         isSleep = False
-        clicks = ['close','ok','wrx','bwx','wbx']        #要加入try again事件
+        clicks = ['close','ok','wrx','bwx','wbx','retrylogin','tryagain'] 
         for c in clicks:
             if self.clickBT(c,False):
                 isSleep = True

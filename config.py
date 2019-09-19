@@ -36,7 +36,7 @@ class CONFS:
     for mtype in box_time:
         img[mtype] = f'{cwd}\\img\\time_{mtype}.png'
 
-    img_types = ['applogo','battle','battle1','start_unlock','onclick','close','ok','bwx','wrx','wbx','loginBT']
+    img_types = ['applogo','battle','battle1','start_unlock','onclick','close','ok','bwx','wrx','wbx','loginBT','retrylogin','tryagain']
     for mtype in img_types:
         img[mtype] = f'{cwd}\\img\\{mtype}.png'
 
