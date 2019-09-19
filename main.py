@@ -92,17 +92,9 @@ class CLASHROYALE(WAITAKEY):
 
         if not is_battle:
             oldpos = pyautogui.position()
-            # x,y = pos_battle[0]
-            # cx = self.game_params.game_area_left + x
-            # cy = self.game_params.game_area_top + self.game_params.game_box_bottom + y
-                       
-            m_mv_x = self.game_params.game_area_left+self.game_params.game_area_width/2
-            m_mv_y = self.game_params.game_area_top+700
-            
-            # pyautogui.moveTo(m_mv_x,m_mv_y,duration=2)
-            pyautogui.click(m_mv_x,m_mv_y)
+            self.clickBT('battle1',False)
             pyautogui.moveTo(oldpos)
-            time.sleep(1)
+            time.sleep(2)
 
     def updateImgbg(self):
         game_area_image = self.grabScreen(self.game_params.game_area_left,          self.game_params.game_area_top,self.game_params.game_area_right,        self.game_params.game_area_bottom)
@@ -114,14 +106,11 @@ class CLASHROYALE(WAITAKEY):
         oldpos = pyautogui.position()
         self.updateImgbg()
         isSleep = False
-        #close事件
-        if self.clickBT('close',False):
-            isSleep = True
-            time.sleep(3)
-        #OK事件
-        if self.clickBT('ok',False):
-            isSleep = True
-            time.sleep(3)
+        clicks = ['close','ok','wrx']        #要加入try again事件
+        for c in clicks:
+            if self.clickBT(c,False):
+                isSleep = True
+                time.sleep(2)
 
         #主窗口事件
         img_bot = self.grabScreen(
@@ -283,7 +272,7 @@ class CLASHROYALE(WAITAKEY):
            
             cx = self.game_params.game_area_left+x
             cy = self.game_params.game_area_top+self.game_params.game_box_top+y
-            # print(cx,cy)
+            # print(cx,cy)q
             pyautogui.moveTo(cx,cy,duration=0.5)
             for i in range(16):
                 pyautogui.click(cx,cy)
