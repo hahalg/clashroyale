@@ -29,7 +29,6 @@ class CONFS:
 
 
     conf = configparser.ConfigParser()
-    has_conffile = False
     if len(conf.read(f'{curdir}\\config.ini'))<1:
         game_area_width = 403
         game_area_height = 716
@@ -51,7 +50,6 @@ class CONFS:
             'dir':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\',
             }
     else:
-        has_conffile = True
         game_area_width = conf.getint('game','area_width')
         game_area_height = conf.getint('game','area_height')
         game_box_top = conf.getint('game','box_top')
@@ -71,15 +69,16 @@ class CONFS:
             'params':conf.get('app','params'),
             'dir':conf.get('app','dir'),
             }
+        window_title = conf.get('app','name')
 
     def __init__(self,window_title=None):
         self.screen_width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
         self.screen_height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
         # print('system:',params)
         if window_title == None :
-            window_title = self.conf.get('app','name')
-        # else:
-            # print('No window title!')
+            window_title = self.window_title
+        else:
+            self.window_title = window_title
             # exit(0)
         self.hwnd = win32gui.FindWindow(win32con.NULL,window_title)
         if self.hwnd == 0 :
@@ -122,7 +121,6 @@ class CONFS:
         self.window_left = window_left
 
     def startApp(self,window_title):
-        print(self.app_cmd)
         win32api.ShellExecute(0,'open',self.app_cmd['exe'],self.app_cmd['params'],self.app_cmd['dir'],1)
         print('start: '+ str(self.app_cmd))
         time.sleep(10)
@@ -135,6 +133,6 @@ if __name__ == '__main__':
     # game = CONFS('Android Emulator - sq_Pixel_2_API_28:5554')
     game = CONFS()
     print(game.curdir)
-    print(game.app_cmd)
+    print(game.window_title)
     print(game.img['h'])
     game.resizeAPP()
