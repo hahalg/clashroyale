@@ -7,6 +7,7 @@ import win32gui
 #import win32ui
 #from ctypes import windll
 import win32con
+import configparser 
 
 class CONFS:
     curdir = dirname(__file__)
@@ -27,30 +28,59 @@ class CONFS:
         img['card'][item] = f'{curdir}\\img\\b_{item}.png'
 
 
-    game_area_width = 403
-    game_area_height = 716
-    game_box_top = 514
-    game_box_bottom = 645
-    game_box_width = 92
-    game_box_height = 114
-    game_box_space = 10
+    conf = configparser.ConfigParser()
+    has_conffile = False
+    if len(conf.read(f'{curdir}\\config.ini'))<1:
+        game_area_width = 403
+        game_area_height = 716
+        game_box_top = 514
+        game_box_bottom = 645
+        game_box_width = 92
+        game_box_height = 114
+        game_box_space = 10
 
-    #app的位置
-    app_left = 899
-    app_top = 5
-    app_width = 416
-    app_height = 751
+        #app的位置
+        app_left = 899
+        app_top = 5
+        app_width = 416
+        app_height = 751
 
-    app_cmd = {
-        'exe':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe',    
-        'params':'-avd sq_Pixel_2_API_28 -netfast',
-        'dir':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\',
-        }
+        app_cmd = {
+            'exe':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe',    
+            'params':'-avd sq_Pixel_2_API_28 -netfast',
+            'dir':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\',
+            }
+    else:
+        has_conffile = True
+        game_area_width = conf.getint('game','area_width')
+        game_area_height = conf.getint('game','area_height')
+        game_box_top = conf.getint('game','box_top')
+        game_box_bottom = conf.getint('game','box_bottom')
+        game_box_width = conf.getint('game','box_width')
+        game_box_height = conf.getint('game','box_height')
+        game_box_space = conf.getint('game','box_space')
 
-    def __init__(self,window_title):
+        #app的位置
+        app_left = conf.getint('app','left')
+        app_top = conf.getint('app','top')
+        app_width = conf.getint('app','width')
+        app_height = conf.getint('app','height')
+
+        app_cmd = {
+            'exe':conf.get('app','exe'),    
+            'params':conf.get('app','params'),
+            'dir':conf.get('app','dir'),
+            }
+
+    def __init__(self,window_title=None):
         self.screen_width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
         self.screen_height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
         # print('system:',params)
+        if window_title == None :
+            window_title = self.conf.get('app','name')
+        # else:
+            # print('No window title!')
+            # exit(0)
         self.hwnd = win32gui.FindWindow(win32con.NULL,window_title)
         if self.hwnd == 0 :
             print('%s not found' % window_title)
@@ -68,6 +98,7 @@ class CONFS:
             # CLASHROYALE.errExit(des=params)
             # print('params err!')
             # exit(-1)
+            
 
         self.game_area_left = self.window_left + 8
         self.game_area_top = self.window_top + 34
@@ -91,16 +122,19 @@ class CONFS:
         self.window_left = window_left
 
     def startApp(self,window_title):
-            win32api.ShellExecute(0,'open',self.app_cmd['exe'],self.app_cmd['params'],self.app_cmd['dir'],1)
-            print('start: '+ str(self.app_cmd))
-            time.sleep(10)
-            self.hwnd = win32gui.FindWindow(win32con.NULL,window_title)
-            self.resizeAPP()
+        print(self.app_cmd)
+        win32api.ShellExecute(0,'open',self.app_cmd['exe'],self.app_cmd['params'],self.app_cmd['dir'],1)
+        print('start: '+ str(self.app_cmd))
+        time.sleep(10)
+        self.hwnd = win32gui.FindWindow(win32con.NULL,window_title)
+        self.resizeAPP()
 
 if __name__ == '__main__':
     print('start:'+"-"*20)
     # game = CONFS('Android Emulator - sq_Pixel_2_API_24:5554')
-    game = CONFS('Android Emulator - sq_Pixel_2_API_28:5554')
+    # game = CONFS('Android Emulator - sq_Pixel_2_API_28:5554')
+    game = CONFS()
     print(game.curdir)
     print(game.app_cmd)
     print(game.img['h'])
+    game.resizeAPP()
