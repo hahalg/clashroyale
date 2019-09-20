@@ -1,6 +1,7 @@
 # -*- coding: utf-8-*-  
 
-import os,time
+import time
+from os.path import dirname, join
 import win32api
 import win32gui
 #import win32ui
@@ -8,42 +9,22 @@ import win32gui
 import win32con
 
 class CONFS:
-    # cwd = os.getcwd()+'\\cheat\\clashroyale'
-    cwd = os.getcwd()
-    if 'clashroyale' not in cwd:
-        cwd = cwd+'\\clashroyale'
-    '''
-    img_applogo = f'{cwd}\\img\\applogo.png'
-    img_battle = f'{cwd}\\img\\battle.png'
-    img_open = f'{cwd}\\img\\time_open.png'
-    img_startunlock = f'{cwd}\\img\\start_unlock.png'
-    img_onclick = f'{cwd}\\img\\onclick.png'
-    img_close = f'{cwd}\\img\\close.png'
-    img_ok = f'{cwd}\\img\\ok.png'
-
-    img_h = f'{cwd}\\img\\time_h.png'
-    img_min = f'{cwd}\\img\\time_min.png'
-    img_sec = f'{cwd}\\img\\time_sec.png'
-    '''
+    curdir = dirname(__file__)
     img = {}
     
     box_types = ['90m','3h','4h','6h','8h','12h','blank','opennow']
-    for mtype in box_types:
-        img[mtype] = f'{cwd}\\img\\time_{mtype}.png'
-        # exec(f'img_{mtype} = \'{cwd}\img\\\\time_{mtype}.png\'')
-
     box_time = ['h','min','sec','open']
-    for mtype in box_time:
-        img[mtype] = f'{cwd}\\img\\time_{mtype}.png'
+    for m in (box_types + box_time):
+        img[m] = f'{curdir}\\img\\time_{m}.png'
 
     img_types = ['applogo','battle','battle1','start_unlock','onclick','close','ok','bwx','wrx','wbx','loginBT','retrylogin','tryagain']
     for mtype in img_types:
-        img[mtype] = f'{cwd}\\img\\{mtype}.png'
+        img[mtype] = f'{curdir}\\img\\{mtype}.png'
 
     game_items = ['bd','hunter','mk','bb','mh','zap','guards','cc']
     img['card'] = {}
     for item in game_items:
-        img['card'][item] = f'{cwd}\\img\\b_{item}.png'
+        img['card'][item] = f'{curdir}\\img\\b_{item}.png'
 
 
     game_area_width = 403
@@ -52,19 +33,21 @@ class CONFS:
     game_box_bottom = 645
     game_box_width = 92
     game_box_height = 114
-    game_box_space = 10      #10
+    game_box_space = 10
 
+    #app的位置
     app_left = 899
     app_top = 5
     app_width = 416
     app_height = 751
 
-    app_cmd = {'exe':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe',
-    'params':'-avd sq_Pixel_2_API_28 -netfast',
-    'dir':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\'}
+    app_cmd = {
+        'exe':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe',    
+        'params':'-avd sq_Pixel_2_API_28 -netfast',
+        'dir':'C:\\Users\\sq\\AppData\\Local\\Android\\Sdk\\emulator\\',
+        }
 
     def __init__(self,window_title):
-        
         self.screen_width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
         self.screen_height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
         # print('system:',params)
@@ -72,7 +55,6 @@ class CONFS:
         if self.hwnd == 0 :
             print('%s not found' % window_title)
             self.startApp(window_title)
-            # exit(0)
         # win32gui.SetForegroundWindow(self.hwnd)
         self.getWindowWH()
         if self.window_width!= self.app_width:
@@ -109,20 +91,16 @@ class CONFS:
         self.window_left = window_left
 
     def startApp(self,window_title):
-            # os.system(self.app_cmd)
-            # win32api.ShellExecute(0, 'open', r'C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\emulator\\emulator.exe', ' -avd sq_Pixel_2_API_24 -netfast','C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\emulator\\',1)
             win32api.ShellExecute(0,'open',self.app_cmd['exe'],self.app_cmd['params'],self.app_cmd['dir'],1)
             print('start: '+ str(self.app_cmd))
             time.sleep(10)
             self.hwnd = win32gui.FindWindow(win32con.NULL,window_title)
             self.resizeAPP()
 
-
 if __name__ == '__main__':
-  
     print('start:'+"-"*20)
-    # game = CLASHROYALE('Android Emulator - sq_Pixel_2_API_28:5554')
     # game = CONFS('Android Emulator - sq_Pixel_2_API_24:5554')
     game = CONFS('Android Emulator - sq_Pixel_2_API_28:5554')
-    a = 'app_cmd'
-    print(game)
+    print(game.curdir)
+    print(game.app_cmd)
+    print(game.img['h'])
