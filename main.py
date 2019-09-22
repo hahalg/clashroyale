@@ -44,15 +44,10 @@ class CLASHROYALE(WAITAKEY):
         #run clash royale
         if self.clickBT('applogo'):
             time.sleep(20)
-            self.clickWindow()
-            '''
-            img_bts = ['loginBT','bwx','wrx']
-            for imgbt in img_bts:
-                if self.clickBT(imgbt):
-                    time.sleep(15)
-            '''
         else:
-            print('run app err!')
+            print('Not find app logo!')
+        self.clickWindow()
+
 
     def clickBT(self,imgname=None,grabscreen=True,threshold=0.8):
         if imgname is None:
