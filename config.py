@@ -69,21 +69,21 @@ class CONFS:
             'params':conf.get('app','params'),
             'dir':conf.get('app','dir'),
             }
-        window_title = conf.get('app','name')
+        windowTitle = conf.get('app','name')
 
-    def __init__(self,window_title=None):
+    def __init__(self,windowTitle=None):
         self.screen_width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
         self.screen_height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
         # print('system:',params)
-        if window_title == None :
-            window_title = self.window_title
+        if windowTitle == None :
+            windowTitle = self.windowTitle
         else:
-            self.window_title = window_title
+            self.windowTitle = windowTitle
             # exit(0)
-        self.hwnd = win32gui.FindWindow(win32con.NULL,window_title)
+        self.hwnd = win32gui.FindWindow(win32con.NULL,windowTitle)
         if self.hwnd == 0 :
-            print('%s not found' % window_title)
-            self.startApp(window_title)
+            print('%s not found' % windowTitle)
+            self.startApp()
         # win32gui.SetForegroundWindow(self.hwnd)
         self.getWindowWH()
         if self.window_width!= self.app_width:
@@ -120,11 +120,11 @@ class CONFS:
         self.window_top = window_top
         self.window_left = window_left
 
-    def startApp(self,window_title):
+    def startApp(self):
         win32api.ShellExecute(0,'open',self.app_cmd['exe'],self.app_cmd['params'],self.app_cmd['dir'],1)
         print('start: '+ str(self.app_cmd))
         time.sleep(10)
-        self.hwnd = win32gui.FindWindow(win32con.NULL,window_title)
+        self.hwnd = win32gui.FindWindow(win32con.NULL,self.windowTitle)
         self.resizeAPP()
 
 if __name__ == '__main__':
@@ -133,6 +133,6 @@ if __name__ == '__main__':
     # game = CONFS('Android Emulator - sq_Pixel_2_API_28:5554')
     game = CONFS()
     print(game.curdir)
-    print(game.window_title)
+    print(game.windowTitle)
     print(game.img['h'])
     game.resizeAPP()

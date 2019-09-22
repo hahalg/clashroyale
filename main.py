@@ -32,7 +32,7 @@ class CLASHROYALE(WAITAKEY):
                 win32gui.SetForegroundWindow(self.game_params.hwnd)
             except:
                 #start emulator
-                self.game_params.startApp(self.windowTitle)
+                self.game_params.startApp()
                 time.sleep(5)
                 self.runApp()
     
@@ -106,7 +106,7 @@ class CLASHROYALE(WAITAKEY):
         for c in clicks:
             if self.clickBT(c,False):
                 isSleep = True
-                time.sleep(2)
+                time.sleep(3)
                 self.updateImgbg()
 
         #主窗口事件
