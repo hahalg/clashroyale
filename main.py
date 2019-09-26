@@ -32,7 +32,7 @@ class CLASHROYALE(WAITAKEY):
                 win32gui.SetForegroundWindow(self.game_params.hwnd)
             except:
                 #start emulator
-                self.game_params.startApp(self.windowTitle)
+                self.game_params.startApp()
                 time.sleep(5)
                 self.runApp()
     
@@ -44,15 +44,10 @@ class CLASHROYALE(WAITAKEY):
         #run clash royale
         if self.clickBT('applogo'):
             time.sleep(20)
-            self.clickWindow()
-            '''
-            img_bts = ['loginBT','bwx','wrx']
-            for imgbt in img_bts:
-                if self.clickBT(imgbt):
-                    time.sleep(15)
-            '''
         else:
-            print('run app err!')
+            print('Not find app logo!')
+        self.clickWindow()
+
 
     def clickBT(self,imgname=None,grabscreen=True,threshold=0.8):
         if imgname is None:
@@ -106,7 +101,7 @@ class CLASHROYALE(WAITAKEY):
         for c in clicks:
             if self.clickBT(c,False):
                 isSleep = True
-                time.sleep(2)
+                time.sleep(3)
                 self.updateImgbg()
 
         #主窗口事件
