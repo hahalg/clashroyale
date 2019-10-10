@@ -22,11 +22,15 @@ class CONFS:
     for mtype in img_types:
         img[mtype] = f'{curdir}\\img\\{mtype}.png'
 
-    game_items = ['bd','hunter','mk','bb','mh','zap','guards','cc']
+    card_items = ['bd','hunter','mk','bb','mh','zap','guards','cc']
     img['card'] = {}
-    for item in game_items:
+    for item in card_items:
         img['card'][item] = f'{curdir}\\img\\b_{item}.png'
 
+    game_items = ['Set','TrainingCamp','Yes','royale_red','royale_blue','winner_red','winner_blue','do_battle']
+    # img['game'] = {}
+    for item in game_items:
+        img[item] = f'{curdir}\\img\\{item}.png'
 
     conf = configparser.ConfigParser()
     if len(conf.read(f'{curdir}\\config.ini'))<1:
