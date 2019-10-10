@@ -13,7 +13,7 @@ class CONFS:
     curdir = dirname(__file__)
     img = {}
     
-    box_types = ['90m','3h','4h','6h','8h','12h','blank','opennow']
+    box_types = ['90m','3h','4h','6h','8h','12h','12h1','blank','opennow']
     box_time = ['h','min','sec','open']
     for m in (box_types + box_time):
         img[m] = f'{curdir}\\img\\time_{m}.png'
