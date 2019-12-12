@@ -19,6 +19,8 @@ from sq_waitakey_lib import WAITAKEY
 
 class CLASHROYALE(WAITAKEY):
     auto = False    #是否自动执行
+    mstyle = 1      #显示风格、字体、颜色等
+    showHelpStatus = False #显示help
     def __init__(self,windowTitle=None):
         super(CLASHROYALE,self).__init__()
         self.game_params = config.CONFS(windowTitle)
@@ -43,7 +45,7 @@ class CLASHROYALE(WAITAKEY):
     def runApp(self):
         #run clash royale
         if self.clickBT('applogo'):
-            time.sleep(20)
+            time.sleep(30)
         else:
             print('Not find app logo!')
         self.clickWindow()
@@ -62,6 +64,9 @@ class CLASHROYALE(WAITAKEY):
             cy = self.game_params.game_area_top + y + img_bt.shape[0]/2
             pyautogui.moveTo(cx,cy)
             pyautogui.click(cx,cy)
+            if self.game_params.debug == 1:
+                print('\t',imgname,'clicked!')
+
             return True
         else:
             # print('not find img '+imgname,self.game_params.img[imgname])
@@ -77,10 +82,14 @@ class CLASHROYALE(WAITAKEY):
 
         if not is_battle:
             oldpos = pyautogui.position()
+            self.waitSec = 20
             if not self.clickBT('battle1',False):
-                print('not in game?',end=' ')
+                m_str = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
+                print(m_str,'not in game?',end=' ')
                 if self.clickBT('applogo',False):
                     print('start game...')
+                    time.sleep(self.game_params.app_time)
+                    self.game_params.resizeAPP()
                     time.sleep(5)
                 else:
                     print('Not find game!')
@@ -97,9 +106,11 @@ class CLASHROYALE(WAITAKEY):
         oldpos = pyautogui.position()
         self.updateImgbg()
         isSleep = False
-        clicks = ['loginBT','close','ok','wrx','bwx','wbx','retrylogin','tryagain'] 
-        for c in clicks:
+        # clicks = ['loginBT','close','ok','wrx','bwx','wbx','retrylogin','tryagain'] 
+        for c in self.game_params.img_cancel:
             if self.clickBT(c,False):
+                if self.game_params.debug == 1:
+                    print('\t',c,'clicked!')
                 isSleep = True
                 time.sleep(3)
                 self.updateImgbg()
@@ -112,13 +123,15 @@ class CLASHROYALE(WAITAKEY):
         # img_bot.show()
         img_bot = cv2.cvtColor(np.asarray(img_bot),cv2.COLOR_RGB2BGR)
         img_click = cv2.imread(self.game_params.img['onclick'])
-        is_click,spos = self.inHere(img_click,img_bot,0.5)
+        is_click,spos = self.inHere(img_click,img_bot,0.8)
         if is_click:
             x,y = spos[0]
             cx = self.game_params.game_area_left + x
             cy = self.game_params.game_area_top + self.game_params.game_box_bottom + y
             pyautogui.click(cx,cy)
             isSleep = True
+            if self.game_params.debug == 1:
+                print('\t','主窗口事件','clicked!')
             time.sleep(3)
         else:
             # print('no message.')
@@ -126,23 +139,26 @@ class CLASHROYALE(WAITAKEY):
             # exit(0)
         if isSleep :
             # time.sleep(3)
-            self.updateImgbg()
+            # self.updateImgbg()
+            self.clickWindow()
         pyautogui.moveTo(oldpos)
 
 
 
 
     def grabScreen(self,left,top,right,bottom):
-        return ImageGrab.grab((left,top,right,bottom))
+        img = ImageGrab.grab((left,top,right,bottom))
         # return grabAPP(self.game_params.hwnd,left,top,right,bottom)
+        # img.show()
+        return img
 
     
-    def inHere(self,img1,img2,threshold=0.8):
+    def inHere(self,img1,img2,threshold=0.75,debug=False):
         '''判断img1是否在img2中，返回True or False'''
         if img1 is None or img2 is None :
             print('None file!')
             return None,{}
-        # w,h = 60,20
+        w,h = img1.shape[:2]
         # 获取偏移量
         res = cv2.matchTemplate(img1,img2, cv2.TM_CCOEFF_NORMED)  # 查找block图片在template中的匹配位置，result是一个矩阵，返回每个点的匹配结果
         # print('result:',result)
@@ -157,12 +173,13 @@ class CLASHROYALE(WAITAKEY):
             # break
             # print('pt:',pt)
             # 画出方框
-            # cv2.rectangle(img2, pt, (pt[0] + w, pt[1] + h), (7,249,151), 2)
-        #显示图像   
-        # cv2.imshow('Detected',img2)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        # print('inhere: ',result)
+            cv2.rectangle(img2, pt, (pt[0] + w, pt[1] + h), (7,249,151), 2)
+        if debug:
+            # 显示图像   
+            cv2.imshow(str(threshold),img2)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            print('inhere: ',result)
         return result,mpt
 
     
@@ -177,7 +194,8 @@ class CLASHROYALE(WAITAKEY):
             crontable['err'] = 'box err!'
             # crontable['notice'] = str(self.game_params.game_area_width)+' X '+str(self.game_params.game_area_height)+' OK?'
             crontable['notice'] = str(box_status)
-            print('box err!',box_status)
+            # print('box err!',box_status,'wait',self.waitSec)
+            self.game_params.resizeAPP()
             return crontable
         do_now = False
         for i in range(4):
@@ -195,21 +213,32 @@ class CLASHROYALE(WAITAKEY):
 
 
         # 是否有进行中的情况，有的话计算剩余时间
+        is_AllBlank = True
         if do_now:
-            print('\topen now! time:')
-            img_sec = cv2.imread(self.game_params.img['sec'])
-            is_have,point_type = self.inHere(img_sec,self.imgbg)
-            if not is_have:
-                # crontable.append({'sleep':3600})
-                crontable['sleep'] = 3600
+            is_AllBlank = False
+            # print('\topen now! time:')
+            # img_sec = cv2.imread(self.game_params.img['sec'])
+            img_h = cv2.imread(self.game_params.img['h'])
+            # 截图时间
+            time_img = self.grabScreen(
+                self.game_params.game_area_left+(self.game_params.game_box_space+self.game_params.game_box_width)*(do_n-1)+self.game_params.offset_time_left,
+                self.game_params.game_area_top+self.game_params.game_box_top+self.game_params.offset_time_top,
+                self.game_params.game_area_left+(self.game_params.game_box_space+self.game_params.game_box_width)*(do_n-1)+self.game_params.offset_time_right,
+                self.game_params.game_area_top+self.game_params.game_box_top+self.game_params.offset_time_bottom)
+            if self.game_params.debug == 3:
+                time_img.show()
+            img_timebg = cv2.cvtColor(np.asarray(time_img),cv2.COLOR_RGB2BGR)
+            is_have,point_type = self.inHere(img_h,img_timebg,0.88)
+            if is_have:
+                img_sec = cv2.imread(self.game_params.img['sec'])
+                is_have,point_type = self.inHere(img_h,img_timebg,0.88) 
+                if is_have:
+                    crontable['sleep'] = 90
+                else:
+                    crontable['sleep'] = 3600
+                    # print('\t'*3,'set 3600!')
             else:
                 # crontable.append({'sleep':60})
-                # 截图时间
-                time_img = self.grabScreen(
-                    self.game_params.game_area_left+(self.game_params.game_box_space+self.game_params.game_box_width)*(do_n-1)+25,
-                    self.game_params.game_area_top+self.game_params.game_box_top+4,self.game_params.game_area_left+(self.game_params.game_box_space+self.game_params.game_box_width)*(do_n-1)+97,
-                    self.game_params.game_area_top+self.game_params.game_box_top+20)
-                # time_img.show()
                 # ocr
                 sleep_str = ocr(time_img)
                 # print(sleep_str)
@@ -227,16 +256,24 @@ class CLASHROYALE(WAITAKEY):
                 except BaseException as identifier:
                     sleep_time = 60
                 crontable['sleep'] = sleep_time
+                # print('\t'*3,'sleep time set ',sleep_time)
         else:
             # crontable.append({'sleep':10})
             crontable['sleep'] = 60
-            for i in range(4):
-                if crontable['s'+str(i+1)]!= 'blank':
-                    self.startUnlock(i+1)
+            for startn in self.game_params.box_types[:-2]:
+                for i in range(4):
+                    if crontable['s'+str(i+1)]== startn:
+                        if self.startUnlock(i+1):
+                            self.log_unlock(crontable,i+1)
+                        crontable['sleep'] = 5
+                        is_AllBlank = False
+                        break
+                if not is_AllBlank:
                     break
 
-        for item in crontable:
-            print('\t',item,crontable[item])
+        if not is_AllBlank:
+            for item in crontable:
+                print('\t',item,crontable[item])
 
         # 对比现在的时间，合理安排开箱次序
         m_str = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
@@ -245,6 +282,15 @@ class CLASHROYALE(WAITAKEY):
         # crontable.append({'time':m_str})
         crontable['time'] = m_str
         return crontable
+
+    def log_unlock(self,crontable,n):
+        with open('openbox.log','a') as f:
+            m_str = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
+            try:
+                m_str = f'{m_str} open {n},{crontable["notice"]}\n'
+            except:
+                m_str = f'{m_str} open {n},{crontable}\n'
+            f.write(m_str)
 
     
     def getBoxStatus(self,imgbg):
@@ -264,9 +310,10 @@ class CLASHROYALE(WAITAKEY):
             cx = self.game_params.game_area_left+x
             cy = self.game_params.game_area_top+self.game_params.game_box_top+y
             pyautogui.moveTo(cx,cy)
-            for i in range(16):
+            for i in range(20):
                 pyautogui.click(cx,cy)
                 time.sleep(0.5)
+            
 
         def getBoxSeat(mpoint,mstr):
             for i in range(len(mpoint)):
@@ -285,7 +332,7 @@ class CLASHROYALE(WAITAKEY):
             img_type = cv2.imread(self.game_params.img[mtype])
             # img_type = cv2.imread(img_file.pop())
             if mtype=='opennow':
-                is_have,point_type = self.inHere(img_type,imgbg,0.5)
+                is_have,point_type = self.inHere(img_type,imgbg,0.4)
             else:
                 is_have,point_type = self.inHere(img_type,imgbg)
             if is_have:
@@ -303,6 +350,8 @@ class CLASHROYALE(WAITAKEY):
             return False
         cx = self.game_params.game_area_left+(self.game_params.game_box_space+self.game_params.game_box_width)*(n-1)+self.game_params.game_box_width/2
         cy = self.game_params.game_area_top+self.game_params.game_box_top+self.game_params.game_box_height/2
+        # print('move to ',cx,cy)
+        pyautogui.moveTo(cx,cy,duration=1)
         pyautogui.click(cx,cy)
         time.sleep(0.5)
         if not self.clickBT('start_unlock',True,0.6):
@@ -327,22 +376,27 @@ class CLASHROYALE(WAITAKEY):
         # 分析时间
         m_str = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
         print(m_str)
-        cron_table = self.analysisCron(game_cron_img)
-        return cron_table
+        self.cron_table = self.analysisCron(game_cron_img)
+        return self.cron_table
     
     def flashBoxStatus(self):
         self.putTop()
         self.battleWindow()
-        cron_table = self.analy()
+        self.cron_table = self.analy()
+        self.waitSec = self.cron_table["sleep"]
+        # print('waitsec:',self.waitSec,self.cron_table)
+        self.stdscr.clear()
+        self.showBoxStatus()
+    
+    def showBoxStatus(self):
         i = 2
-        # self.showTime(i,5,'cron_table[item]')
-        mstyle = random.randint(1,4)    #随机样式
-        hspace = 8  #前面空格
-        for item in cron_table:
+        # self.mstyle = random.randint(1,4)    #随机样式
+        self.mstyle = (self.mstyle + 1) % 4
+        hspace = 6  #前面空格
+        for item in self.cron_table:
             i = i+1
-            mstr = str(item).rjust(10)+'\t'+str(cron_table[item]).ljust(30)
-            self.showTime(i,hspace,mstr,mstyle)
-        self.waitSec = cron_table["sleep"]
+            mstr = str(item).rjust(10)+'\t'+str(self.cron_table[item]).ljust(35)
+            self.showTime(i,hspace,mstr,self.mstyle)
         # self.waitTime()
 
     def timeOut(self):
@@ -358,6 +412,58 @@ class CLASHROYALE(WAITAKEY):
         self.auto = not self.auto
         self.showTime(1,4,'auto model:'+str(self.auto).ljust(5))
 
+    def reloadConfig(self):
+        self.game_params.loadConfig()
+        self.showTime(1,24,'size:'+str(self.game_params.app_width)+'X'+str(self.game_params.app_height))
+    
+    def resetWaitTime(self):
+        # curses.echo()
+        setsec = self.stdscr.getstr(1,20,10)
+        try:
+            self.waitSec = int(setsec)
+            # m_str = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
+            m_str = time.strftime("%H:%M:%S",  time.localtime())
+            m_str = m_str+' reset to '+str(self.waitSec)+'s'
+            print(m_str)
+            self.showTime(1,24,m_str)
+        except:
+            self.showTime(1,24,'input err!')
+        # curses.noecho()
+    def viewLog(self):
+        win32api.ShellExecute(0,'open','openbox.log','','',1)
+
+    def changeWaitTime(self,add=True,sec=3600):
+        if add:
+            self.waitSec += sec
+        else:
+            if self.waitSec > sec:
+                self.waitSec -= sec
+            else:
+                self.waitSec = int(self.waitSec/2)
+
+    def showHelp(self):
+        if self.showHelpStatus:
+            self.showHelpStatus = False
+            self.stdscr.clear()
+            self.showBoxStatus()
+            self.stdscr.refresh()
+            return
+        self.showHelpStatus = True
+        helpStr = {
+            'a':'autoRun',
+            'f':'flash box status',
+            'r':'reload config.ini',
+            'i':'input secs to reset wait time',
+            'v':'show openBox log',
+            'h':'show this or not',
+            '=/-':'+3600, -3600 or half',
+        }
+        i = 10
+        for item in helpStr:
+            i = i+1
+            mstr = str(item).rjust(1)+'\t'+str(helpStr[item]).ljust(35)
+            self.showTime(i,6,mstr,3)
+
 if __name__ == '__main__':
     print('start:'+"-"*20)
     game = CLASHROYALE()
@@ -368,10 +474,18 @@ if __name__ == '__main__':
     if cron_table["sleep"] > 0 :
         print(f'wait {cron_table["sleep"]}s ')
         # m_mstr = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
-        m_mstr = 'press \'q\' to quit,\'r\' to reload box. \'a\' to auto. Reflash after '
+        m_mstr = 'press \'q\' to quit,\'h\' to help messeage. Reflash after '
         acts = {
             'a':'self.autoRun()',
-            'r':'self.flashBoxStatus()',
+            'f':'self.flashBoxStatus()',
+            'r':'self.reloadConfig()',
+            'i':'self.resetWaitTime()',
+            'v':'self.viewLog()',
+            'h':'self.showHelp()',
+            '=':'self.changeWaitTime()',
+            '-':'self.changeWaitTime(False)',
+            ']':'self.changeWaitTime(True,60)',
+            '[':'self.changeWaitTime(False,60)',
                 }
         game.setStr(m_mstr)
         game.setSec(cron_table["sleep"])

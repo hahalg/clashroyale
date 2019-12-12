@@ -14,7 +14,7 @@ class WAITAKEY(object):
 
     def setStr(self,printstr=''):
         self.printstr = printstr
-    def setSec(self,waitSec=''):        
+    def setSec(self,waitSec=0):        
         self.waitSec = waitSec
 
     def startWait(self):
@@ -49,7 +49,7 @@ class WAITAKEY(object):
             self.waitSec = 0
             self.e.set()
             return
-
+        
         for item in self.acts:
             if akey == item:
                 exec(self.acts[item])
@@ -59,10 +59,7 @@ class WAITAKEY(object):
         # return akey
 
     def waitEvent(self):
-        # print(f' wait {sec}s')
-        # e.wait(sec)
         self.waitTime()
-        # time.sleep(sec)
         if __name__ == '__main__':
             m_mstr = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
             print(m_mstr)
@@ -71,11 +68,14 @@ class WAITAKEY(object):
         x,y = 0,len(self.printstr)
         showlen = 8
         while True:
-            mmStr = str(self.waitSec)
-            # mmStr = (' '*(showlen-len(mmStr)) + mmStr + 's').ljust(showlen)
-            mmStr = (mmStr+'s').ljust(showlen)
+            waitSec = self.waitSec
+            # waitSec = 5
+            m_waiteTime_m,m_waiteTime_s = divmod(waitSec,60)
+            m_waitTime_h,m_waiteTime_m = divmod(m_waiteTime_m,60)
+            mmStr = '%02d:%02d:%02d' % (m_waitTime_h,m_waiteTime_m,m_waiteTime_s)
+            # mmStr = str(waitSec)
             # 设置文字的前景色和背景色
-            self.stdscr.attron(curses.color_pair(4))    
+            self.stdscr.attron(curses.color_pair(3))    
             self.stdscr.addstr(x, y, mmStr)
             # print(mmStr)
             self.stdscr.refresh()
@@ -85,7 +85,7 @@ class WAITAKEY(object):
             # time.sleep(1)
             self.e.wait(1)
             self.waitSec = self.waitSec - 1
-            if self.waitSec < 1:
+            if self.waitSec < 2:
                 self.timeOut()
                 break
         # stdscr.keypad(0)
@@ -95,7 +95,6 @@ class WAITAKEY(object):
 
     def initCurses(self):
         # 初始化并返回一个window对象
-        
         self.stdscr.clear()
         self.stdscr.refresh()
         # 如何要用带颜色的字就必须调这个方法
