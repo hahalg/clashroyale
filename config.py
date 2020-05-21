@@ -13,13 +13,13 @@ class CONFS:
     curdir = dirname(__file__)
     img = {}
     
-    box_types = ['90m','3h','4h','6h','8h','12h','12h1','blank','opennow']
+    box_types = ['90m','3h','4h','6h','8h','12h','12h1','1d','blank','opennow']
     box_time = ['h','min','sec','open']
     for m in (box_types + box_time):
         img[m] = f'{curdir}\\img\\time_{m}.png'
 
     img_types = ['applogo','battle','battle1','start_unlock','onclick']
-    img_cancel = ['close','ok','bwx','wrx','wbx','loginBT','retrylogin','retrylogin1','tryagain']
+    img_cancel = ['close','ok','bwx','wrx','wbx','loginBT','retrylogin','retrylogin1','tryagain','block','block1','onclick1']
     for mtype in (img_types + img_cancel):
         img[mtype] = f'{curdir}\\img\\{mtype}.png'
 
@@ -32,7 +32,7 @@ class CONFS:
     img['card'] = {}
     for item in card_items:
         img['card'][item] = f'{curdir}\\img\\b_{item}.png'
-    game_items = ['Set','TrainingCamp','Yes','royale_red','royale_blue','winner_red','winner_blue','do_battle']
+    game_items = ['Set','TrainingCamp','Yes','royale_red','royale_blue','winner_red','winner_blue','do_battle','gafts','gaft1']
     # img['game'] = {}
     for item in game_items:
         img[item] = f'{curdir}\\img\\{item}.png'
@@ -81,17 +81,17 @@ class CONFS:
         )
     def getWindowWH(self):
         window_left,window_top,window_right,window_bottom = win32gui.GetWindowRect(self.hwnd)
-        print('game状态：',end=' ')
+        # print('game状态：',end=' ')
         print(window_left,window_top,window_right,window_bottom)
         self.window_width = window_right - window_left
         self.window_height = window_bottom - window_top
-        print('width:',self.window_width,'height:',self.window_height)
+        # print('width:',self.window_width,'height:',self.window_height)
         self.window_top = window_top
         self.window_left = window_left
 
     def startApp(self):
         win32api.ShellExecute(0,'open',self.app_cmd['exe'],self.app_cmd['params'],self.app_cmd['dir'],1)
-        print('start: '+ str(self.app_cmd) + ' wait ',self.exe_time,'s')
+        # print('start: '+ str(self.app_cmd) + ' wait ',self.exe_time,'s')
         time.sleep(self.exe_time)
         self.hwnd = win32gui.FindWindow(win32con.NULL,self.windowTitle)
         self.resizeAPP()

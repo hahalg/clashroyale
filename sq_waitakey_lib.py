@@ -8,7 +8,11 @@ class WAITAKEY(object):
     '''等待输入，输入后退出，或者超时退出'''
     waitSec = 10
     go = True
-    def __init__(self):
+    key_quit = 'q'
+    acts = []
+    def __init__(self,pos=[0,0]):
+        self.x = pos[0]
+        self.y = pos[1]
         self.stdscr = curses.initscr()
         self.initCurses()
 
@@ -27,6 +31,15 @@ class WAITAKEY(object):
 
         self.wait_thread.start()
         self.input_thread.start()
+    
+    def stopWait(self):
+        print('\tstop wait! '+self.__class__.__name__)
+        print('\ttime out:',self.go)
+        self.waitSec = 0
+        self.e.set()
+        # print('\tstop?',self.e.is_set())
+        # self.stop_thread(self.wait_thread.ident)
+        # self.stop_thread(self.input_thread.ident)
 
 
     def setActs(self,acts):
@@ -35,27 +48,33 @@ class WAITAKEY(object):
     def getInput(self):
         # stdscr.nodelay(0)
         self.stdscr.attron(curses.color_pair(1))    
-        self.stdscr.addstr(0, 0, self.printstr)
+        self.stdscr.addstr(self.x, self.y, self.printstr)
         self.stdscr.refresh()
+        self.stdscr.nodelay(1)
+        while self.go:
+            mkey = self.stdscr.getch()
+            if mkey < 1:
+                continue
+            akey = chr(mkey)
+            # stdscr.nodelay(sec)
+            # akey = input(mstr)
+            # print('您输入了:',akey)
+            # if akey == 'q':
+            if akey == self.key_quit:
+                print('=> QUIT '+self.__class__.__name__)
+                self.go = False
+                # self.waitSec = 0
+                # # self.e.set()
+                self.stopWait()
+                # self.timeOut()
+                break
+            
+            for item in self.acts:
+                if akey == item:
+                    exec(self.acts[item])
+                    self.stdscr.refresh()
 
-        akey = chr(self.stdscr.getch())
-        # stdscr.nodelay(sec)
-        # akey = input(mstr)
-        # print('您输入了:',akey)
-        # if akey == 'q':
-        if akey == 'q':
-            print(' quit')
-            self.go = False
-            self.waitSec = 0
-            self.e.set()
-            return
-        
-        for item in self.acts:
-            if akey == item:
-                exec(self.acts[item])
-                self.stdscr.refresh()
-
-        self.getInput()
+        # self.getInput()
         # return akey
 
     def waitEvent(self):
@@ -64,8 +83,8 @@ class WAITAKEY(object):
             m_mstr = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
             print(m_mstr)
 
-    def waitTime(self):
-        x,y = 0,len(self.printstr)
+    def waitTime(self,slen=6):
+        x,y = self.x,len(self.printstr)+self.y
         showlen = 8
         while True:
             waitSec = self.waitSec
@@ -73,6 +92,10 @@ class WAITAKEY(object):
             m_waiteTime_m,m_waiteTime_s = divmod(waitSec,60)
             m_waitTime_h,m_waiteTime_m = divmod(m_waiteTime_m,60)
             mmStr = '%02d:%02d:%02d' % (m_waitTime_h,m_waiteTime_m,m_waiteTime_s)
+            # if m_waitTime_h < 1:
+            #     mmStr = mmStr[3:]
+            # if m_waitTime_h < 1 and m_waiteTime_m < 1:
+            #     mmStr = mmStr[3:]
             # mmStr = str(waitSec)
             # 设置文字的前景色和背景色
             self.stdscr.attron(curses.color_pair(3))    
@@ -85,13 +108,14 @@ class WAITAKEY(object):
             # time.sleep(1)
             self.e.wait(1)
             self.waitSec = self.waitSec - 1
-            if self.waitSec < 2:
-                self.timeOut()
-                break
+            if self.waitSec < 1:
+                if self.timeOut():
+                    break
         # stdscr.keypad(0)
 
     def timeOut(self):
-        pass
+        self.stopWait()
+        return True
 
     def initCurses(self):
         # 初始化并返回一个window对象
@@ -120,17 +144,23 @@ class WAITAKEY(object):
         self.stdscr.refresh()
 
 if __name__ == '__main__':
-
+    import sys
     m_mstr = time.strftime("%Y%m%d-%H:%M:%S",  time.localtime())
+    m_mstr = 'kill game after '
     print(m_mstr)
     acts = {
         'a':'self.showTime(3,10,\'like do it\')',
         'b':'self.showTime(4,10,\'yes!!!!\',2)',
             }
     # waitk = waitAKey('press \'q\' to quit,\'f\' to flash box:',20,acts)
+    print(sys.argv)
     waitk = WAITAKEY()
     waitk.setStr(m_mstr)
-    waitk.setSec(40)
+    if len(sys.argv)>1:
+        waittime = int(sys.argv[1])
+    else:
+        waittime = 35
+    waitk.setSec(waittime)
     waitk.setActs(acts)
     waitk.startWait()
     waitk.showTime(6,5,'come here!')
